@@ -11,6 +11,7 @@
       text-shadow: 0 5px 20px rgba(0,0,0,0.8);
       background: #222;
       scroll-behavior:smooth;
+      text-align:center;
     }
     
     textarea {
@@ -312,7 +313,7 @@
       z-index: 100;
     }
     .flex-cont {
-      display:flex;flex-direction:column;border-radius:10px;margin:10px 0;
+      display:flex;flex-direction:column;border-radius:10px;margin:0 10px;padding:10px;width: 100%;
     }
     .pad-5 {padding:10px;}
     .flex-cont-row{
@@ -332,6 +333,44 @@
     .tflex textarea:last-child {
     	border-bottom: none;
     }
+    h2 {font-size:25px;}
+    .neo-table th {
+    	border: green solid 3px;
+    	padding: 5px;
+    }
+    .neo-table  td {
+    	border: white solid 2px;
+    	padding: 5px;
+    }
+    .neo-table {
+    	border: white solid 4px;
+  		border-collapse: collapse;
+  		border-spacing: 0;
+    }
+    .neo-table{
+    	margin: 10px auto;
+    }
+    .gridmtx {
+    	display: grid;
+    	grid-template-rows: repeat(3, 1fr);
+    	grid-template-columns: repeat(3, 1fr);
+    	border-collapse: collapse;
+    	border-spacing: 0; 
+    	width: 40vmax;
+    	height: 40vmax;
+    	margin: 0 auto;
+    }
+    .gridmtx input {
+    	display:inline;
+    	box-shadow:none;
+    	border-radius:0;
+    	background: #111;
+    	margin: 0;
+    	border: 3px solid #999;
+    	font-size: 3vmax;
+    }
+    h3 {font-size:20px;}
+    .vflex {display:flex;}
     /*End PacifikyNeoDark*/
   </style>
   <meta charset="utf-8">
@@ -360,14 +399,52 @@
   </div>
   </div>
   </div>
+  <hr/>
   <!-- todo: translate, transformation matrix, rotation -->
+  <h2>Transformation</h2>
+  <div class='vflex'>
+  	<div class='flex-cont contsolid'>
+  		<h3>Translation</h3>
+  		<input type='number' value='0' placeholder='X' title='X' id='su-transx'/>
+  		<input type='number' value='0' placeholder='Y' title='Y' id='su-transy'/>
+  		<input type='number' value='0' placeholder='Z' title='Z' id='su-transz'/>
+  	</div>
+  	<div class='flex-cont contsolid'>
+  		<h3>Rotation</h3>
+  		<input type='number' value='0' placeholder='X' title='X' id='su-rotx'/>
+  		<input type='number' value='0' placeholder='Y' title='Y' id='su-roty'/>
+  		<input type='number' value='0' placeholder='Z' title='Z' id='su-rotz'/>
+  		<!-- Radians/Deg/Minutes -->
+  		<select id='su-runit'>
+  			<option>Degrees</option>
+  			<option>Radians</option>
+  			<option>Clock</option>
+  			<option>Minutes</option>
+  		</select>
+  	</div>
+  </div>
+  <div class='flex-cont contsolid' style='margin: 20px 0;'>
+  	<h3>Matrix</h3>
+  	<div class='gridmtx' id='su-transmtx'>
+  		<input type='number' value='1' step='0.1' title='XX'/>
+  		<input type='number' value='0' step='0.1' title='YX'/>
+  		<input type='number' value='0' step='0.1' title='ZX'/>
+  		<input type='number' value='0' step='0.1' title='XY'/>
+  		<input type='number' value='1' step='0.1' title='YY'/>
+  		<input type='number' value='0' step='0.1' title='ZY'/>
+  		<input type='number' value='0' step='0.1' title='XZ'/>
+  		<input type='number' value='0' step='0.1' title='YZ'/>
+  		<input type='number' value='1' step='0.1' title='ZZ'/>
+  	</div>
+  </div>
+  <hr/>
   <h2>Help</h2>
   <span>
   	Comments start with #.
   	<br/>
   	Statements end with a line break.
   </span>
-  <table>
+  <table class='neo-table'>
   	<thead>
   		<tr>
   			<th>Op</th>
@@ -387,6 +464,8 @@
   </table>
   <footer>
   	Document Created: 4/28/25
+  	<br/>
+  	Version: 1.0.1
   	<hr/>
   	SutherGPU was created by Kain and Pacifiky
   	<br/>
@@ -403,6 +482,60 @@
   	const zout = document.getElementById('su-zout');
   	const cout = document.getElementById('su-cout');
     const wrapsel = document.getElementById("su-wrapsel");
+    const trax = document.getElementById('su-transx');
+    const tray = document.getElementById('su-transy');
+    const traz = document.getElementById('su-transz');
+    const unitsel = document.getElementById('su-runit');
+    const trmtx = document.getElementById('su-transmtx');
+    const rotx = document.getElementById('su-rotx');
+    const roty = document.getElementById('su-roty');
+    const rotz = document.getElementById('su-rotz');
+    const rmtx = [[1,0,0],[0,1,0],[0,0,1]];
+    
+    function updrmtx(){
+    	let rotvx = 0;
+    	let rotvy = 0;
+    	let rotvz = 0;
+    	switch(uintsel.value){
+    		case 'Degrees':
+    			rotvx = (parseFloat(rotx.value)*Math.PI)/180;
+    			rotvy = (parseFloat(roty.value)*Math.PI)/180;
+    			rotvz = (parseFloat(rotz.value)*Math.PI)/180;
+    			break;
+    		case 'Radians':
+    			rotvx = parseFloat(rotx.value);
+    			rotvy = parseFloat(roty.value);
+    			rotvz = parseFloat(rotz.value);
+    			break;
+    		case 'Clock':
+    			rotvx = (parseFloat(rotx.value)*Math.PI)/6;
+    			rotvy = (parseFloat(roty.value)*Math.PI)/6;
+    			rotvz = (parseFloat(rotz.value)*Math.PI)/6;
+    			break;
+    		case 'Minutes':
+    			rotvx = (parseFloat(rotx.value)*Math.PI)/10800;
+    			rotvy = (parseFloat(roty.value)*Math.PI)/10800;
+    			rotvz = (parseFloat(rotz.value)*Math.PI)/10800;
+    	}
+    	rmtx = [
+    		[
+    			Math.cos(rotvz)*Math.cos(rotvy),
+    			(Math.cos(rotvz)*Math.sin(rotvx)*Math.sin(rotvy))-(Math.sin(rotvz)*Math.cos(rotvx)),
+    			(Math.cos(rotvz)*Math.sin(rotvy)*Math.cos(rotvx))+(Math.sin(rotvz)*Math.sin(rotvx))
+    		],
+    		[
+    			Math.cos(rotvy)*Math.sin(rotvz),
+    			(Math.sin(rotvz)*Math.sin(rotvy)*Math.sin(rotvx))+(Math.cos(rotvx)*Math.cos(rotvz)),
+    			(Math.cos(rotvx)*Math.sin(rotvy)*Math.sin(rotvz))-(Math.sin(rotvx)*Math.cos(rotvz))
+    		],
+    		[
+    			-Math.sin(rotvy),
+    			Math.sin(rotvx)*Math.cos(rotvy),
+    			Math.cos(rotvx)*Math.cos(rotvy)
+    		]
+    	];
+    }
+    
     function trig0f(e) {
       const inpv = cinp.value.split('\n');
       //let output = '';
@@ -426,9 +559,9 @@
       						const zvert = parseFloat(stat.pop());
       						if(!(Number.isNaN(xvert) || Number.isNaN(yvert) || Number.isNaN(zvert))){
       							//output += '0x'+float2half(xvert).toString(16)+',0x'+float2half(yvert).toString(16)+',0x'+float2half(zvert).toString(16)+',0x'+clr+'\n';
-      							xlist.push(xvert);
-      							ylist.push(yvert);
-      							zlist.push(zvert);
+      							xlist.push(parseFloat(trmtx.children[0].value)*xvert + parseFloat(trmtx.children[1].value)*yvert + parseFloat(trmtx.children[2].value)*zvert);
+      							ylist.push(parseFloat(trmtx.children[3].value)*xvert + parseFloat(trmtx.children[4].value)*yvert + parseFloat(trmtx.children[5].value)*zvert);
+      							zlist.push(parseFloat(trmtx.children[6].value)*xvert + parseFloat(trmtx.children[7].value)*yvert + parseFloat(trmtx.children[8].value)*zvert);
       							clist.push(clr);
       						}else{
       							err += 'Error: "v" operation has NaN arguements!\nOn Line'+(i+1).toString()+'\n';
@@ -465,17 +598,17 @@
       	cout.value = "0x"+clist.join(',0x');
       	let out = "";
       	for(let i=0;i<xlist.length;i++){
-      		out+='0x'+float2half(xlist[i]).toString(16)+',';
+      		out+='0x'+float2half(xlist[i]+parseFloat(trax.value)).toString(16)+',';
       	}
       	xout.value = out;
       	out = "";
       	for(let i=0;i<ylist.length;i++){
-      		out+='0x'+float2half(ylist[i]).toString(16)+',';
+      		out+='0x'+float2half(ylist[i]+parseFloat(tray.value)).toString(16)+',';
       	}
       	yout.value = out;
       	out = "";
       	for(let i=0;i<zlist.length;i++){
-      		out+='0x'+float2half(zlist[i]).toString(16)+',';
+      		out+='0x'+float2half(zlist[i]+parseFloat(traz.value)).toString(16)+',';
       	}
       	zout.value = out;
       }

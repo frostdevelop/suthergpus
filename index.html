@@ -333,7 +333,7 @@
     .tflex textarea:last-child {
     	border-bottom: none;
     }
-    h2 {font-size:25px;}
+    h2 {font-size:30px;}
     .neo-table th {
     	border: green solid 3px;
     	padding: 5px;
@@ -369,8 +369,17 @@
     	border: 3px solid #999;
     	font-size: 3vmax;
     }
-    h3 {font-size:20px;}
+    h3 {font-size:25px;color:white;margin: 10px 0;}
+    span, p {text-align:left;}
+    .bodytxt {
+    	display:inline-block;
+    	text-align:left !important;
+    	width: 100%;
+    }
     .vflex {display:flex;}
+    .blockcode {background: rgba(255,255,255,0.2);font-family:monospace;border-radius:20px;padding: 20px; margin: 10px auto;width: 60%;white-space:pre-line;}
+    a{color:#348feb;transition:color .2s linear;}
+    a:hover{color:#a3c9f0}
     /*End PacifikyNeoDark*/
   </style>
   <meta charset="utf-8">
@@ -392,10 +401,10 @@
   <textarea placeholder='INPUT' id='su-in' style="white-space: nowrap;"></textarea>
   <hr class='vd'/>
   <div class='tflex'>
-  <textarea placeholder='X' id='su-xout' style="white-space: nowrap;"></textarea>
-  <textarea placeholder='Y' id='su-yout' style="white-space: nowrap;"></textarea>
-  <textarea placeholder='Z' id='su-zout' style="white-space: nowrap;"></textarea>
-  <textarea placeholder='C' id='su-cout' style="white-space: nowrap;"></textarea>
+  <textarea placeholder='X' title='X' id='su-xout' style="white-space: nowrap;"></textarea>
+  <textarea placeholder='Y' title='Y'id='su-yout' style="white-space: nowrap;"></textarea>
+  <textarea placeholder='Z' title='Z'id='su-zout' style="white-space: nowrap;"></textarea>
+  <textarea placeholder='C' title='C'id='su-cout' style="white-space: nowrap;"></textarea>
   </div>
   </div>
   </div>
@@ -416,10 +425,11 @@
   		<input type='number' value='0' placeholder='Z' title='Z' id='su-rotz'/>
   		<!-- Radians/Deg/Minutes -->
   		<select id='su-runit'>
-  			<option>Degrees</option>
-  			<option>Radians</option>
-  			<option>Clock</option>
-  			<option>Minutes</option>
+  			<option value='d'>Degrees</option>
+  			<option value='r'>Radians</option>
+  			<option value='c'>Clock</option>
+  			<option value='m'>Minutes</option>
+  			<option value='g'>Gradians</option>
   		</select>
   	</div>
   </div>
@@ -438,13 +448,88 @@
   	</div>
   </div>
   <hr/>
-  <h2>Help</h2>
-  <span>
-  	Comments start with #.
+  <h2>Assembler Guide 📎</h2>
+  <span class='bodytxt'>
+  	Greetings programmers! Welcome to this little assembler I made for the SutherGPU! 
   	<br/>
-  	Statements end with a line break.
+  	My name is Pacifiky, one of the creators of the <a href='https://circuitverse.org/simulator/femboy-8'>Fem8 CPU</a>, <a href='https://circuitverse.org/simulator/cb-ppu'>Color Burst PPU</a>, and the <a href='https://circuitverse.org/simulator/suthergpu'>SutherGPU</a>.
+  	<br/>
+  	So a bit of <strong>prerequisites...</strong>
+  	<br/>
+  	The SutherGPU is a 16-bit (or half float) GPU so it has a bit of accuraccy errors, but it's fine for most static meshes.
+  	<br/>
+  	As of v1.0, it can only drive a 64x64 screen so keep that in mind while creating models.
+  	<br/>
+  	The model can be created centered on the origin because the circuit does have translation and transform matrix controls.
+  	<br/>
+  	The coordiate system is normalized to screen height so 1 in both x and y will be equal to the height of the screen (64px).
+  	<br/>
+  	Finally, the center of the screen is marked as the origin.
+  	<br/>
+  	Also, if you're curious on what inspired the name, it was inspired by the computer graphis pioneer Ivan Sutherland. He created the first cad program "Sketchpad" and the first augmented reality headset (Sword of Damocles).
   </span>
-  <table class='neo-table'>
+  <h3>Controls 🎛</h3>
+  <span class='bodytxt'>
+  	In the middle of the page is 1 text input on the left and 4 text inputs on the right.
+  	<br/>
+  	The left input is the place where you will write your assembly and the 4 inputs on the right are the outputs.
+  	<br/>
+  	The inputs on the right are ordered top to bottom, with the same layout as the VTable roms on the circuit.
+  	<br/>
+  	Above this area, you will find two inputs. A button labeled "Run" and a dropdown labeled "None"
+  	<ul>
+  		<li>The 'Run' button runs the assembler, or turns your code to the machine code.</li>
+  		<li>The 'None' dropdown selects the word wrapping of both the input and output fields</li>
+  	</ul>
+  	Under these fields, you will find a "transformation" section.
+  	<br/>
+  	These inputs basically transform the verticies that go to the gpu. Think of it as quick and simple way of editing a mesh.
+  	<br/>
+  	The block to the top left controls the translation of the model ordered x, y,and z from top to bottom.
+  	<br/>
+  	The block on the top right controls the rotation of the model. It's ordered the same as the translation block, x, y, and z from top to bottom. At the bottom you can select the units you're using to measure the angle!
+  	<br/>
+  	Below these, there is a section holding a transformation matrix. Nothing really there to explain except you should look it up on google if you don't understand it.
+  	<br/>
+  	And that's basically all you need to know to control the assembler!
+  </span>
+  <h3>Loading 💽</h3>
+  <span class='bodytxt'>
+  	In order to load your code into the GPU, you must go into the VTable circuit, and load the hex in each of the outputs to their correlated ROM.
+  	<br/>
+  	Hover overing each of the output fields shows which rom it should go into (check the name of the outputs of each rom).
+  </span>
+  <h3>Syntax 🏁</h3>
+  <span class='bodytxt'>
+  	There are four types of "lexical elements". 
+  	<ul>
+  		<li>Operations: These are basically what is excecuted on the gpu. You can find a tale of operations <a href='#a-optable'>here</a></li>
+  		<li>Arguments: After an operation, you place arguments! This is specified by the brackets on the argument names after the instruction.</li>
+  		<li>Statement: These are basically just made up of everything in a line. It can either contain an operation and it's arguements, or a single comment. Each statement is separated by a line break.</li>
+  		<li>Comments: These begin with a # and you can place them on single lines or after statements! Keep in mind that when putting comments after statements, you must include a space (the assembler uses it as a delimiter)</li>
+  	</ul>
+  	Here's an example of the syntax:
+  	<br/>
+  	<div class='blockcode'>v 0.2 0.5 0.3 #This is a comment
+  		#This is another comment
+  		clr FFFF00
+  		v 0.2 0.6 0.2 00FF00
+  	</div>
+  	You might've noticed I took a bit of inspiration from the obj file format.
+  </span>
+  <h3>Errors 🚫</h3>
+  <span class='bodytxt'>
+  	If your code has problems, errors will show up in the X output field. It will tell you what the problem is and the line it ocurrs on!
+  	<br/>
+  	Here's a few errors and what they mean:
+  	<ul>
+  		<li><strong>"v" operation has a invalid comment or clr arguement</strong>: This means that you have wrote something after the locational arguments of the v op that's invalid.</li>
+  		<li><strong>"v" operation has NaN arguements!</strong>: This means that some of the locational arguments of the v op are NaN or Not a Number. You might've accidentally wrote letters there.</li>
+  		<li><strong>Clr operation's argument isn't a 24 bit hex number!</strong>: This means the arguemnt you gave for the color on a clr op wasn't in the correct format. Remember: hex codes should be 6 chars long and only contain numbers and letters a-f</li>
+  		<li><strong>Invalid Operation</strong>: This means that the operation you're trying to excecute doesn't exist. You might've tried to make a comment without a '#'</li>
+  	</ul>
+  </span>
+  <table class='neo-table' id='a-optable'>
   	<thead>
   		<tr>
   			<th>Op</th>
@@ -454,18 +539,18 @@
   	<tbody>
   		<tr>
   			<td>v [x] [y] [z] [clr]?</td>
-  			<td>Defines a vertex</td>
+  			<td>Defines a vertex. X, Y, and Z are decimal numbers and clr is a 24-bit hex value. The clr arguement is optional.</td>
   		</tr>
   		<tr>
   			<td>clr [clr]</td>
-  			<td>Defines a color for next verticies</td>
+  			<td>Defines a color for next verticies. The clr is a 24-bit hex value.</td>
   		</tr>
   	</tbody>
   </table>
   <footer>
   	Document Created: 4/28/25
   	<br/>
-  	Version: 1.0.1
+  	Version: 1.2
   	<hr/>
   	SutherGPU was created by Kain and Pacifiky
   	<br/>
@@ -490,32 +575,37 @@
     const rotx = document.getElementById('su-rotx');
     const roty = document.getElementById('su-roty');
     const rotz = document.getElementById('su-rotz');
-    const rmtx = [[1,0,0],[0,1,0],[0,0,1]];
+    let rmtx = [[1,0,0],[0,1,0],[0,0,1]];
     
     function updrmtx(){
     	let rotvx = 0;
     	let rotvy = 0;
     	let rotvz = 0;
-    	switch(uintsel.value){
-    		case 'Degrees':
+    	switch(unitsel.value){
+    		case 'd':
     			rotvx = (parseFloat(rotx.value)*Math.PI)/180;
     			rotvy = (parseFloat(roty.value)*Math.PI)/180;
     			rotvz = (parseFloat(rotz.value)*Math.PI)/180;
     			break;
-    		case 'Radians':
+    		case 'r':
     			rotvx = parseFloat(rotx.value);
     			rotvy = parseFloat(roty.value);
     			rotvz = parseFloat(rotz.value);
     			break;
-    		case 'Clock':
+    		case 'c':
     			rotvx = (parseFloat(rotx.value)*Math.PI)/6;
     			rotvy = (parseFloat(roty.value)*Math.PI)/6;
     			rotvz = (parseFloat(rotz.value)*Math.PI)/6;
     			break;
-    		case 'Minutes':
+    		case 'm':
     			rotvx = (parseFloat(rotx.value)*Math.PI)/10800;
     			rotvy = (parseFloat(roty.value)*Math.PI)/10800;
     			rotvz = (parseFloat(rotz.value)*Math.PI)/10800;
+    			break;
+    		case 'g':
+    			rotvx = (parseFloat(rotx.value)*Math.PI)/200;
+    			rotvy = (parseFloat(roty.value)*Math.PI)/200;
+    			rotvz = (parseFloat(rotz.value)*Math.PI)/200;
     	}
     	rmtx = [
     		[
@@ -534,7 +624,14 @@
     			Math.cos(rotvx)*Math.cos(rotvy)
     		]
     	];
+    	//alert('hi')
+    	//console.log(rmtx)
     }
+    
+    rotx.addEventListener('change', updrmtx);
+    roty.addEventListener('change', updrmtx);
+    rotz.addEventListener('change', updrmtx);
+    unitsel.addEventListener('change', updrmtx);
     
     function trig0f(e) {
       const inpv = cinp.value.split('\n');
@@ -557,12 +654,26 @@
       						const xvert = parseFloat(stat.pop());
       						const yvert = parseFloat(stat.pop());
       						const zvert = parseFloat(stat.pop());
+      						let clrvv = stat.pop();
       						if(!(Number.isNaN(xvert) || Number.isNaN(yvert) || Number.isNaN(zvert))){
       							//output += '0x'+float2half(xvert).toString(16)+',0x'+float2half(yvert).toString(16)+',0x'+float2half(zvert).toString(16)+',0x'+clr+'\n';
-      							xlist.push(parseFloat(trmtx.children[0].value)*xvert + parseFloat(trmtx.children[1].value)*yvert + parseFloat(trmtx.children[2].value)*zvert);
-      							ylist.push(parseFloat(trmtx.children[3].value)*xvert + parseFloat(trmtx.children[4].value)*yvert + parseFloat(trmtx.children[5].value)*zvert);
-      							zlist.push(parseFloat(trmtx.children[6].value)*xvert + parseFloat(trmtx.children[7].value)*yvert + parseFloat(trmtx.children[8].value)*zvert);
-      							clist.push(clr);
+      							const xiv = parseFloat(trmtx.children[0].value)*xvert + parseFloat(trmtx.children[1].value)*yvert + parseFloat(trmtx.children[2].value)*zvert;
+      							const yiv = parseFloat(trmtx.children[3].value)*xvert + parseFloat(trmtx.children[4].value)*yvert + parseFloat(trmtx.children[5].value)*zvert;
+      							const ziv = parseFloat(trmtx.children[6].value)*xvert + parseFloat(trmtx.children[7].value)*yvert + parseFloat(trmtx.children[8].value)*zvert;
+      							xlist.push(xiv*rmtx[0][0] + yiv*rmtx[0][1] + ziv*rmtx[0][2]);
+      							ylist.push(xiv*rmtx[1][0] + yiv*rmtx[1][1] + ziv*rmtx[1][2]);
+      							zlist.push(xiv*rmtx[2][0] + yiv*rmtx[2][1] + ziv*rmtx[2][2]);
+      							if(clrvv != undefined && clrvv[0] != "#"){
+      								clrvv = clrvv.toUpperCase()
+      								if(hex.test(clrvv) && clrvv.length == 6){
+      									alert(clrvv);
+      									clist.push(clrvv);
+      								}else{
+      									err += 'Error: "v" operation has a invalid comment or clr arguement\nOn Line: '+(i+1).toString()+'\n';
+      								}
+      							}else{
+      								clist.push(clr);
+      							}
       						}else{
       							err += 'Error: "v" operation has NaN arguements!\nOn Line'+(i+1).toString()+'\n';
       						}
